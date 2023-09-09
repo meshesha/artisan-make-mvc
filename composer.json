@@ -1,0 +1,24 @@
+{
+    "name": "meshesha/artisan-make-mvc",
+    "description": "Laravel artisan command to create view, controller and route from existing Model",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Meshesha\\ArtisanMakeMvc\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "meshesha",
+            "email": "tadytiodros@gmail.com"
+        }
+    ],
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Meshesha\\ArtisanMakeMvc\\ArtisanMakeMvcServiceProvider"
+            ]
+        }
+    }
+}

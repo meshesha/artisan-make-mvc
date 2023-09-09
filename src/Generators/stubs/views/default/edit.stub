@@ -1,0 +1,22 @@
+$EXTEND_LAYOUTS$
+
+$YIELD_SECTION$
+<div style="margin: 5px;">
+    <h1>$HEAD_TITLE$</h1>
+    <a href="{{-- route('$TABLE_NAME$.index') --}}{{ url()->previous() }}" 
+        style="text-decoration:none;background-color:#5bc0de;color:white;padding:5px 5px;text-align:center;display:inline-block;border-radius:5px;">
+        Go Back
+    </a>
+    <br>
+    <form action="{{route('$TABLE_NAME$.update',  $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" method="POST">
+        @csrf
+        $UPDATE_CONTENT$
+        @method('PUT')
+        <button type="submit" 
+            style="background-color:#0275d8;color:white;padding:5px 5px;text-align:center;display:inline-block;border: none;border-radius:5px;">
+            Update
+        </button>
+    </form>
+    <br>
+</div>
+$YIELD_SECTION_END$
