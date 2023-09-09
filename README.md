@@ -79,6 +79,15 @@ Route::resource('posts', 'PostController');
 ```
 
 
+### undo
+
+```bash
+
+php artisan mvc:undo
+
+```
+
+will delete all recently created files
 
 
 

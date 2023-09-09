@@ -12,7 +12,7 @@ class UndoMvc extends Command
      *
      * @var string
      */
-    protected $signature = 'undo:mvc {--show} {--delselect}';
+    protected $signature = 'mvc:undo {--show} {--delselect}';
 
 
     /**
