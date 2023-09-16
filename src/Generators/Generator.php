@@ -21,6 +21,8 @@ class Generator
     protected $inc_views;
     protected $inc_route;
 
+    protected $add_to_history;
+
     protected $views_arr = ['index', 'create', 'edit', 'show'];
 
     /**
@@ -33,7 +35,7 @@ class Generator
      * Create a new Generator instance.
      * @param Command $cmd
      */
-    public function __construct(Command $cmd, $laravel_ver, $inc_ctrlr, $incviews, $inc_route)
+    public function __construct(Command $cmd, $laravel_ver, $inc_ctrlr, $incviews, $inc_route, $add_to_history)
     {
         // parent::__construct();
         $this->cmd = $cmd;
@@ -53,7 +55,7 @@ class Generator
         $this->inc_views = $incviews;
         $this->inc_route = $inc_route;
 
-
+        $this->add_to_history = $add_to_history;
     }
     /**
      * @param  array  $model_param
@@ -65,6 +67,8 @@ class Generator
         $create_controller = false;
         $create_views = false;
         $add_rout = false;
+
+        $add_to_history = $this->add_to_history;
 
         if(!empty($controller_param) && $this->inc_controller) {
             $create_controller = $this->createController($model_param, $controller_param);
@@ -79,7 +83,7 @@ class Generator
             $add_rout = $this->addRoute($model_param, $controller_param);
 
         }
-        if($create_controller || $create_views || $add_rout) {
+        if($add_to_history && ($create_controller || $create_views || $add_rout)) {
             $his_stt = $this->addToHis($model_param["model_name"], $create_controller, $create_views, $add_rout);
         }
 

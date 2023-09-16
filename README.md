@@ -87,7 +87,7 @@ php artisan mvc:undo
 
 ```
 
-will delete all recently created files
+Will delete all recently created files
 
 
 

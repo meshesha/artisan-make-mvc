@@ -26,7 +26,8 @@ class MakeMvc extends Command
                                 {--F|viewfolder=} 
                                 {--H|includehidden=true} 
                                 {--C|inccontroller=true} 
-                                {--R|incroute=true}';
+                                {--R|incroute=true}
+                                {--A|addtohistory=true}';
 
 
     /**
@@ -57,6 +58,7 @@ class MakeMvc extends Command
         $incctrlr = ($this->option('inccontroller') == "true") ? true : false;
         $incroute = ($this->option('incroute') == "true") ? true : false;
         $incviews = ($this->option('incviews') == "true") ? true : false;
+        $add_to_history = ($this->option('addtohistory') == "true") ? true : false;
 
         $model_data = $this->getModelData($model_path, $includehidden);
 
@@ -81,7 +83,7 @@ class MakeMvc extends Command
         // $this->line('view_path : ' . $view_path . "\n");
         $controller_data = $this->setControllerData($model, $incctrlr);
 
-        $generator = new Generator($this, $laravel_ver, $incctrlr, $incviews, $incroute);
+        $generator = new Generator($this, $laravel_ver, $incctrlr, $incviews, $incroute, $add_to_history);
         $generator->makeMvc($model_data, $view_path, $controller_data);
 
     }
@@ -172,7 +174,7 @@ class MakeMvc extends Command
             // if stasr with '\'
             $model_path = substr($model_path, 1);
         }
-
+        $this->line("model_path: $model_path");
         $app_model = app($model_path);
 
         $db_table_name = $app_model->getTable();

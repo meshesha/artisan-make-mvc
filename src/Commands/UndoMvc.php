@@ -27,16 +27,9 @@ class UndoMvc extends Command
     {
         $laravel_ver = app()->version();
 
-
-        //get history file path
-        $his_path = $this->getHisFile();
-        $his_contents = file_get_contents($his_path);
-
-        // $this->line('his_contents : \n' . $his_contents . "\n");
-
-        $his_json = json_decode($his_contents);
-
-
+        $his_ = $this->getHisFileContent();
+        $his_path = $his_["path"];
+        $his_json = $his_["content"];
         // print_r($his_json);
 
         if($his_json == null || empty($his_json)) {
@@ -46,9 +39,6 @@ class UndoMvc extends Command
 
         $show = $this->option('show');
         if($show) {
-            // $his_ary = array_map(function($itm){
-            //     return $itm->name;
-            // },$his_json);
             foreach($his_json as $key => $his_item) {
                 $this->info(($key + 1) . ' - ' . $his_item->name . " " . $his_item->datetime);
             }
@@ -63,9 +53,6 @@ class UndoMvc extends Command
 
             $selected_to_del = $this->choice('Select which one to delete: ', $his_ary, head($his_ary));
             $to_del = explode(" ", $selected_to_del)[0];
-            // $to_del_obj = array_filter($his_json, function ($his_item) use ($to_del) {
-            //     return $his_item->name == $to_del;
-            // });
             $to_del_obj = null;
             foreach($his_json as $his_item) {
                 if($his_item->name == $to_del) {
@@ -73,12 +60,7 @@ class UndoMvc extends Command
                     break;
                 }
             }
-            // $this->line('to_del_obj: ');
-            // print_r($to_del_obj);
-            // return;
             if($this->deleteHis($to_del_obj)) {
-                //$his_path
-                // remove  $to_del from his fle - TODO
                 $updated_his_obj = array_filter($his_json, function ($his_item) use ($to_del) {
                     return $his_item->name != $to_del;
                 });
@@ -106,19 +88,28 @@ class UndoMvc extends Command
 
         }
 
-        // $this->line("to delete :\n");
+    }
 
-        // print_r($last_add);
 
-        // $last_add = array_pop($his_json);
+    public function getHisFileContent()
+    {
+        
+        //get history file path
+        $his_path = $this->getHisFile();
+        $his_contents = file_get_contents($his_path);
 
-        // $this->line("to save :\n");
+        // $this->line('his_contents : \n' . $his_contents . "\n");
 
-        // print_r($his_json);
+        return [
+            "path" => $his_path,
+            "content" => json_decode($his_contents)
+        ];
 
     }
 
-    private function getHisFile()
+
+
+    public function getHisFile()
     {
         return   __DIR__ .'/../Generators/history/history.json';
     }
