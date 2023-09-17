@@ -4,48 +4,32 @@ namespace Meshesha\ArtisanMakeMvc\Tests;
 
 use Tests\TestCase;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
+use Illuminate\Support\Facades\Artisan;
 use Meshesha\ArtisanMakeMvc\Tests\Traits\FilesAssert;
 
 
 class MvcTestCase extends TestCase
 {
     use FilesAssert;
-    use RefreshDatabase;
 
     protected $migrationFile;
-    // protected $dbmigrationFile;
-
-    protected static $initialized = FALSE;
     
-
+    
+    protected static $initialized = FALSE;
 
     public function setUp(): void
     {
         parent::setUp();
-        if(!File::exists(app_path('Models/TestPost.php'))){
-            // echo "Models/TestPost.php not exists\n";
-            $this->fail('Test failed because the condition did not match.');
-            return;
-        }
 
-        if(File::exists(app_path('Models/TestPost.php') )){
-            // echo "Models/TestPost.php not exists\n";
-            $app_model = app("App\\Models\\TestPost");
-
-            $db_table_name = $app_model->getTable();
-
-            $db_primary_key = $app_model->getKeyName();
-
-            $columns_arr =  Schema::getColumnListing($db_table_name);
-            // print_r($columns_arr);
-
-            if(!in_array("title", $columns_arr)){   
-                $this->fail('Test failed because the condition did not match (table not contain columns).');
-                return;
+        if(!File::exists(app_path('Models/TestPost.php')) ){
+            File::put(app_path('Models/TestPost.php'), '<?php namespace App\Models; use Illuminate\Database\Eloquent\Model; class TestPost extends Model { protected $fillable = [\'title\', \'content\']; }');
+            
+            if (!self::$initialized) {
+                    $this->createTeatPostMigration();
+                self::$initialized = TRUE;
+                
             }
+
         }
         
     }
@@ -58,10 +42,61 @@ class MvcTestCase extends TestCase
         File::deleteDirectory(resource_path('views/test_posts'));
         File::deleteDirectory(resource_path('views/diffrent_test_folder'));
         File::delete(app_path('Http/Controllers/TestPostController.php'));
+        File::delete(app_path('Models/TestPost.php'));
 
         $this->removeTestRoute();
 
 
+        File::delete($this->migrationFile);
+    }
+
+    private function createTeatPostMigration()
+    {
+        
+
+        try{
+            Artisan::call('make:migration', [
+                'name' => 'create_test_posts_table',
+                '--create' => 'test_posts',
+            ]);
+            // $artisanOutput = Artisan::output();
+        } catch (\Exception | Error $e) {
+            // echo "create migration error: " . $e->getMessage() . "\n";
+        }  catch(\Throwable $e) {
+            // echo "create migration error: " . $e->getMessage() . "\n";
+        }
+
+        try{
+            $test_posts_table = glob(database_path('migrations/*_create_test_posts_table.php'));
+          
+            $migrationFile = $test_posts_table[0];
+            $this->migrationFile = $migrationFile;
+            
+            $migrationContents = file_get_contents($migrationFile);
+            if(strpos($migrationContents,"table->string('title')") === false){
+                $migrationContents = str_replace(
+                    '$table->id();',
+                    '$table->id();' . PHP_EOL . '$table->string(\'title\');' . PHP_EOL . '$table->text(\'content\');',
+                    $migrationContents
+                );
+
+                file_put_contents($migrationFile, $migrationContents);
+            }
+        } catch(\Throwable $e) {
+            // echo "adding new fields in migration error: " . $e->getMessage() . "\n";
+        }
+        try{
+            Artisan::call('migrate');
+            $artisanOutput = Artisan::output();
+
+            if (in_array("Error", str_split($artisanOutput, 5))) {
+                throw new Exception($artisanOutput);
+            }
+        } catch (Exception | Error $e) {
+            // echo "migrate action error: " . $e->getMessage() . "\n";
+        } catch(\Throwable $e) {
+            // echo "migrate action error: " . $e->getMessage() . "\n";
+        }
     }
 
 

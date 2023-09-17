@@ -9,7 +9,6 @@ use App\Models\TestPost;
 
 class MvcTest extends MvcTestCase
 {
-    
     public function test_creating_all_restful_views_controller_and_adding_route()
     {
 
@@ -225,8 +224,6 @@ class MvcTest extends MvcTestCase
         $response = $this->get('/test_posts');
         $response->assertStatus(200);
         $response->assertSee("test body data present in index table");
-
-
 
     }
 
