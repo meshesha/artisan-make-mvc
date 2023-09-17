@@ -6,7 +6,7 @@ use Tests\TestCase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
 use Meshesha\ArtisanMakeMvc\Tests\Traits\FilesAssert;
-
+// use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class MvcTestCase extends TestCase
 {

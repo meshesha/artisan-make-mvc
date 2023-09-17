@@ -1,1 +1,1 @@
-[]
+[{"name":"User","datetime":"17-09-2023 04:08:42","controller":"app\/Http\/Controllers\/UserController.php","views":["resources\/views\/users\/index.blade.php","resources\/views\/users\/create.blade.php","resources\/views\/users\/edit.blade.php","resources\/views\/users\/show.blade.php"],"route":"\n\n\/\/ users:\nRoute::resource('users', App\\Http\\Controllers\\UserController::class);"}]

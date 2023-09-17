@@ -5,6 +5,8 @@ namespace Meshesha\ArtisanMakeMvc\Tests;
 
 use Meshesha\ArtisanMakeMvc\Tests\MvcTestCase;
 use App\Models\TestPost;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 
 class MvcTest extends MvcTestCase
@@ -227,4 +229,65 @@ class MvcTest extends MvcTestCase
 
     }
 
+    public function test_creating_all_restful_views_controller_and_adding_route_and_check_updating_data()
+    {
+        $this->artisan('make:mvc TestPost --addtohistory=false');
+
+        $this->refreshApplication();
+
+        $this->isViewExists('test_posts/index.blade.php');
+        $this->isViewExists('test_posts/show.blade.php');
+        $this->isViewExists('test_posts/create.blade.php');
+        $this->isViewExists('test_posts/edit.blade.php');
+        $this->isControllerExists('TestPostController.php');
+        $this->isRoutAdded('TestPostController',app()->version());
+    
+
+        $last_post = TestPost::latest("id")->first();
+        // dd($last_post);
+        
+        $update_post_test = [
+            'title' => 'test title 1234 - updated test',
+            'content' => 'test to update post'
+        ];
+        
+        $response = $this->put("/test_posts/{$last_post->id}" , $update_post_test);
+        $response->assertStatus(302); //302 - redirect
+
+        $this->assertDatabaseHas('test_posts', $update_post_test);
+
+    }
+
+
+    public function test_creating_all_restful_views_controller_and_adding_route_and_check_delete_record()
+    {
+        $this->artisan('make:mvc TestPost --addtohistory=false');
+
+        $this->refreshApplication();
+
+        $this->isViewExists('test_posts/index.blade.php');
+        $this->isViewExists('test_posts/show.blade.php');
+        $this->isViewExists('test_posts/create.blade.php');
+        $this->isViewExists('test_posts/edit.blade.php');
+        $this->isControllerExists('TestPostController.php');
+        $this->isRoutAdded('TestPostController',app()->version());
+        
+        $last_post = TestPost::latest("id")->first();
+
+
+        $response = $this->delete("/test_posts/{$last_post->id}");
+        $response->assertStatus(302); //302 - redirect
+
+        $this->assertDatabaseMissing('test_posts', ['id' => $last_post->id]);
+
+    }
+
+    public function test_end_delete_test_table()
+    {
+        //clear test table
+        // DB::table('test_posts')->truncate();
+        Schema::dropIfExists('test_posts');
+        $this->assertFalse(Schema::hasTable('test_posts'));
+
+    }
 }
