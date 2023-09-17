@@ -33,3 +33,5 @@ jobs:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: vendor/bin/phpunit
+    - name: Laravel Package Test Action
+      uses: matriphe/laravel-pkg-test-action@v2
