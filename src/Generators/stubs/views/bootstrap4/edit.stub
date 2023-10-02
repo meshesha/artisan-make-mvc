@@ -8,7 +8,7 @@ $YIELD_SECTION$
             <a href="{{-- route('$TABLE_NAME$.index') --}}{{ url()->previous() }}" class="btn btn-info float-right"> Go Back</a>
         </h1>
         <div class="card-body">
-            <form action="{{route('$TABLE_NAME$.update',  $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" method="POST">
+            <form action="{{route('$TABLE_NAME$.update',  $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" method="POST">
                 @csrf
                 $UPDATE_CONTENT$
                 @method('PUT')

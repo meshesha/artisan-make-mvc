@@ -7,7 +7,7 @@ $YIELD_SECTION$
             $HEAD_TITLE$
             <div>
                 <a href="{{ route('$TABLE_NAME$.index') }}" class="btn btn-info">Go Back</a>
-                <a href="{{route('$TABLE_NAME$.edit', $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" class="btn btn-primary">Edit</a>
+                <a href="{{route('$TABLE_NAME$.edit', $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" class="btn btn-primary">Edit</a>
             </div>
         </h1>
         <div class="card-body">

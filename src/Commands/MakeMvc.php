@@ -6,7 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 // use Schema;
 
-use Doctrine\DBAL\Connection;
+// use Doctrine\DBAL\Connection;
+use Doctrine\DBAL;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,10 @@ class MakeMvc extends Command
                                 {--H|includehidden=true} 
                                 {--C|inccontroller=true} 
                                 {--R|incroute=true}
-                                {--A|addtohistory=true}';
+                                {--A|addtohistory=true}
+                                {--test}
+                                {--pest}
+                                {--factory}';
 
 
     /**
@@ -59,11 +63,14 @@ class MakeMvc extends Command
         $incroute = ($this->option('incroute') == "true") ? true : false;
         $incviews = ($this->option('incviews') == "true") ? true : false;
         $add_to_history = ($this->option('addtohistory') == "true") ? true : false;
+        $is_test = ($this->option('test')) ? true : false;
+        $is_pest = ($this->option('pest')) ? true : false;
+        $is_factory = ($this->option('factory')) ? true : false;
 
         $model_data = $this->getModelData($model_path, $includehidden);
 
-        // $cols_types_arr = $model_data["columnInfo"];
-        // print_r($cols_types_arr); 
+        // $cols_arr = $model_data["columns"];
+        // print_r($cols_arr); 
         // return;
 
         if(empty($model_data)) {
@@ -84,7 +91,7 @@ class MakeMvc extends Command
         $controller_data = $this->setControllerData($model, $incctrlr);
 
         $generator = new Generator($this, $laravel_ver, $incctrlr, $incviews, $incroute, $add_to_history);
-        $generator->makeMvc($model_data, $view_path, $controller_data);
+        $generator->makeMvc($model_data, $view_path, $controller_data, $is_test, $is_pest, $is_factory);
 
     }
 
@@ -174,7 +181,7 @@ class MakeMvc extends Command
             // if stasr with '\'
             $model_path = substr($model_path, 1);
         }
-        $this->line("model_path: $model_path");
+        // $this->line("model_path: $model_path");
         $app_model = app($model_path);
 
         $db_table_name = $app_model->getTable();
@@ -183,9 +190,14 @@ class MakeMvc extends Command
 
         $columnInfo = [];
 
-
         try {
-            $columns_arr =  Schema::getColumnListing($db_table_name);
+            $columns_arr = array_map(function($col){
+                return $col->column_name;
+            }, $this->getTableColumns($db_table_name));
+            
+            if($columns_arr == null || empty($columns_arr)){
+                $columns_arr =  Schema::getColumnListing($db_table_name);
+            }
 
             try {
                 //get db table column info -  Method 1
@@ -274,9 +286,8 @@ class MakeMvc extends Command
                 // print_r($columnInfo);
             }
 
-
-
         } catch(\Illuminate\Database\QueryException $e) {
+            // $this->error('error (method aaaa)'. $e->getMessage());
             return [];
         }
 
@@ -304,7 +315,23 @@ class MakeMvc extends Command
 
     }
 
+    private function getTableColumns($table_name)
+    {
+        try{
+            $database = DB::connection()->getDatabaseName();
+            return DB::select(
+                (new \Illuminate\Database\Schema\Grammars\MySqlGrammar)->compileColumnListing()
+                    .' order by ordinal_position',
+                [ (($database)?$database: env('DB_DATABASE')), $table_name]
+            );
+        } catch(\Throwable $e) {
+            // $this->error('error getTableColumns 1)'. $e->getMessage());
 
+        } catch(\Exception $e) {
+            // $this->error('error (getTableColumns 1)'. $e->getMessage());
+        }
+        return [];
+    }
     private function setControllerData($model, $is_create_ctrl)
     {
         $sub_folder = "";

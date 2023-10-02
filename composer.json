@@ -34,5 +34,8 @@
                 "Meshesha\\ArtisanMakeMvc\\ArtisanMakeMvcServiceProvider"
             ]
         }
+    },
+    "require": {
+        "doctrine/dbal": "^3.7"
     }
 }

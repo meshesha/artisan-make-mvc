@@ -284,8 +284,7 @@ class MvcTest extends MvcTestCase
 
     public function test_end_delete_test_table()
     {
-        //clear test table
-        // DB::table('test_posts')->truncate();
+        //delete test table
         Schema::dropIfExists('test_posts');
         $this->assertFalse(Schema::hasTable('test_posts'));
 

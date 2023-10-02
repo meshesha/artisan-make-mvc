@@ -7,7 +7,7 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
-$USE_MODAL$;
+$USE_MODEL$;
 
 class $CONTROLLER_NAME$ extends Controller
 {
@@ -30,7 +30,9 @@ class $CONTROLLER_NAME$ extends Controller
      */
     public function index()
     {
-        $$TABLE_NAME$ = $MODAL_NAME$::all();
+        //https://laravel.com/docs/8.x/pagination#using-bootstrap
+        //$$TABLE_NAME$ = $MODEL_NAME$::paginate(10);// laravel ver. < 8 => bootstrap | laravel ver. >= 8 =>Tailwind  
+        $$TABLE_NAME$ = $MODEL_NAME$::$PAGINATE$($PAGINATE_PER_PAGE$);
 
         $data = [
             '$TABLE_NAME$' => $$TABLE_NAME$
@@ -68,11 +70,11 @@ class $CONTROLLER_NAME$ extends Controller
 
         $REQUEST_INPUT_TO_VAR$
 
-        $$MODAL_NAME_LOWER$ = new $MODAL_NAME$;
+        $$MODEL_NAME_LOWER$ = new $MODEL_NAME$;
 
         $VARTOMODEL$
 
-        if($$MODAL_NAME_LOWER$->save()){
+        if($$MODEL_NAME_LOWER$->save()){
             return redirect("/$TABLE_NAME$")->with('success', 'Data saved successfully');
         }
 
@@ -87,13 +89,13 @@ class $CONTROLLER_NAME$ extends Controller
      */
     public function show($id)
     {
-        $$MODAL_NAME_LOWER$ = $MODAL_NAME$::find($id);
+        $$MODEL_NAME_LOWER$ = $MODEL_NAME$::find($id);
         
-        if(!$$MODAL_NAME_LOWER$){
-            return redirect()->back()->with('error', '$MODAL_NAME_LOWER$ not found');
+        if(!$$MODEL_NAME_LOWER$){
+            return redirect()->back()->with('error', '$MODEL_NAME_LOWER$ not found');
         }
         $data = [
-            '$MODAL_NAME_LOWER$' => $$MODAL_NAME_LOWER$
+            '$MODEL_NAME_LOWER$' => $$MODEL_NAME_LOWER$
         ];
 
         return view('$TABLE_NAME$.show')->with($data);
@@ -107,14 +109,14 @@ class $CONTROLLER_NAME$ extends Controller
      */
     public function edit($id)
     {
-        $$MODAL_NAME_LOWER$ = $MODAL_NAME$::find($id);
+        $$MODEL_NAME_LOWER$ = $MODEL_NAME$::find($id);
 
-        if(!$$MODAL_NAME_LOWER$){
-            return redirect()->back()->with('error', '$MODAL_NAME_LOWER$ not found');
+        if(!$$MODEL_NAME_LOWER$){
+            return redirect()->back()->with('error', '$MODEL_NAME_LOWER$ not found');
         }
         
         $data = [
-            '$MODAL_NAME_LOWER$' => $$MODAL_NAME_LOWER$
+            '$MODEL_NAME_LOWER$' => $$MODEL_NAME_LOWER$
         ];
 
         return view('$TABLE_NAME$.edit')->with($data);
@@ -138,17 +140,17 @@ class $CONTROLLER_NAME$ extends Controller
         //     'col_n' => 'required',
         // ]);
 
-        $$MODAL_NAME_LOWER$ = $MODAL_NAME$::find($id);
+        $$MODEL_NAME_LOWER$ = $MODEL_NAME$::find($id);
 
-        if(!$$MODAL_NAME_LOWER$){
-            return redirect()->back()->with('error', '$MODAL_NAME_LOWER$ not found');
+        if(!$$MODEL_NAME_LOWER$){
+            return redirect()->back()->with('error', '$MODEL_NAME_LOWER$ not found');
         }
 
         $REQUEST_INPUT_TO_VAR$
 
         $VARTOMODEL$
 
-        if($$MODAL_NAME_LOWER$->save()){
+        if($$MODEL_NAME_LOWER$->save()){
             return redirect()->back()->with('success', 'Data updated successfully');
         }
 
@@ -167,15 +169,15 @@ class $CONTROLLER_NAME$ extends Controller
     public function destroy($id)
     {
 
-        $$MODAL_NAME_LOWER$ = $MODAL_NAME$::find($id);
+        $$MODEL_NAME_LOWER$ = $MODEL_NAME$::find($id);
 
-        if(!$$MODAL_NAME_LOWER$){
-            return redirect()->back()->with('error', '$MODAL_NAME_LOWER$ not found');
+        if(!$$MODEL_NAME_LOWER$){
+            return redirect()->back()->with('error', '$MODEL_NAME_LOWER$ not found');
         }
 
         // It is recommended to check authorization before performing a deletion
 
-        if($$MODAL_NAME_LOWER$->delete()){
+        if($$MODEL_NAME_LOWER$->delete()){
             return redirect()->back()->with('success', 'Data deleted successfully');
         }
 

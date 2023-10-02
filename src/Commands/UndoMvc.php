@@ -12,7 +12,7 @@ class UndoMvc extends Command
      *
      * @var string
      */
-    protected $signature = 'mvc:undo {--show} {--delselect}';
+    protected $signature = 'mvc:undo {--L|list} {--S|select}';
 
 
     /**
@@ -37,16 +37,16 @@ class UndoMvc extends Command
             return;
         }
 
-        $show = $this->option('show');
-        if($show) {
+        $list = $this->option('list');
+        if($list) {
             foreach($his_json as $key => $his_item) {
                 $this->info(($key + 1) . ' - ' . $his_item->name . " " . $his_item->datetime);
             }
             return;
         }
 
-        $delselect = $this->option('delselect');
-        if($delselect) {
+        $select = $this->option('select');
+        if($select) {
             $his_ary = array_map(function ($his_item) {
                 return $his_item->name . " " . $his_item->datetime;
             }, $his_json);
@@ -130,73 +130,35 @@ class UndoMvc extends Command
 
         if ($this->confirm("Are you sure you want to delete all files created to '$title' ?")) {
 
-            $is_err = false;
+            $is_success = true;
 
             if(isset($his_obj->controller)) {
                 // delete controller file
                 $ctrl_path = $his_obj->controller; //string
-
-                if(File::exists($ctrl_path)) {
-                    try {
-                        File::delete($ctrl_path);
-                        $this->info("$ctrl_path - deleted successfully.");
-                    } catch(\Throwable $e) {
-                        $this->error("Error delete file ($ctrl_path): ". $e->getMessage());
-                        $is_err = true;
-                    } catch (\RunTimeException $e) {
-                        $this->error("Error delete file ($ctrl_path): ". $e->getMessage());
-                        $is_err = true;
-                    } catch(\Exception $e) {
-                        $this->error("Error delete file ($ctrl_path): ". $e->getMessage());
-                        $is_err = true;
-                    }
-                } else {
-                    $this->error("The file ('$ctrl_path') does not exists!");
-                }
-
-                // $this->line("ctrl_path :$ctrl_path");
+                $is_success = $this->DeleteFile($ctrl_path);
 
             }
             if(isset($his_obj->views)) {
                 // delete views file
                 $views_path_arr = $his_obj->views; //array
                 foreach($views_path_arr as $views_path) {
-                    if(File::exists($views_path)) {
-                        try {
-                            File::delete($views_path);
-                            $this->info("$views_path - deleted successfully.");
+                    
+                    $is_success =  $this->DeleteFile($views_path);
+                        
+                    $view_folder = substr($views_path, 0, strrpos($views_path, "/"));
 
-                            $view_folder = substr($views_path, 0, strrpos($views_path, "/"));
+                    if (strpos($view_folder, strtolower($his_obj->name)) !== false && File::exists($view_folder)) {
 
+                        $files = File::allFiles($view_folder);
 
-                            if (strpos($view_folder, strtolower($his_obj->name)) !== false && File::exists($view_folder)) {
-
-                                $files = File::allFiles($view_folder);
-
-                                if (empty($files)) {
-                                    if(File::deleteDirectory($view_folder)) {
-                                        $this->info("The folder '$view_folder' deleted successfully.");
-                                    }
-                                }
-
+                        if (empty($files)) {
+                            if(File::deleteDirectory($view_folder)) {
+                                $this->info("The folder '$view_folder' deleted successfully.");
                             }
-
-                        } catch(\Throwable $e) {
-                            $this->error("Error delete file ($views_path): ". $e->getMessage());
-                            $is_err = true;
-                        } catch (\RunTimeException $e) {
-                            $this->error("Error delete file ($views_path): ". $e->getMessage());
-                            $is_err = true;
-                        } catch(\Exception $e) {
-                            $this->error("Error delete file ($views_path): ". $e->getMessage());
-                            $is_err = true;
                         }
 
-                    } else {
-                        $this->error("The file ('$views_path') does not exists!");
                     }
                 }
-                // $this->line("views_path_arr :" . implode("\n", $views_path_arr));
 
             }
             if(isset($his_obj->route)) {
@@ -217,10 +179,10 @@ class UndoMvc extends Command
                         $this->info("Route removed successfully.");
                     } catch(\Throwable $e) {
                         $this->error("Error saving route: ". $e->getMessage());
-                        $is_err = true;
+                        $is_success = false;
                     } catch(\Exception $e) {
                         $this->error("Error saving route: ". $e->getMessage());
-                        $is_err = true;
+                        $is_success = false;
                     }
 
 
@@ -228,14 +190,48 @@ class UndoMvc extends Command
 
             }
 
-            if($is_err) {
-                return false;
+            
+
+            if(isset($his_obj->factory)) {
+                $file_path = $his_obj->factory; 
+                $is_success =  $this->DeleteFile($file_path);
             }
-            return true;
+
+            if(isset($his_obj->test)) {
+                $file_path = $his_obj->test; 
+                $is_success =  $this->DeleteFile($file_path);
+            }
+
+            return $is_success;
         }
 
         $this->error("Delete canceled!");
         return false;
+    }
+
+
+    private function DeleteFile($file_path){
+
+        if(File::exists($file_path)) {
+            try {
+                File::delete($file_path);
+                $this->info("$file_path - deleted successfully.");
+                return true;
+            } catch(\Throwable $e) {
+                $this->error("Error delete file ($file_path): ". $e->getMessage());
+                return false;
+            } catch (\RunTimeException $e) {
+                $this->error("Error delete file ($file_path): ". $e->getMessage());
+                return false;
+            } catch(\Exception $e) {
+                $this->error("Error delete file ($file_path): ". $e->getMessage());
+                return false;
+            }
+        } 
+        
+        $this->error("The file ('$file_path') does not exists!");
+        return true;
+    
     }
 
 

@@ -10,7 +10,7 @@ $YIELD_SECTION$
         </a>
         <a href="{{route('$TABLE_NAME$.create')}}" 
             style="text-decoration:none;background-color:#0275d8;color:white;padding:5px 5px;text-align:center;display:inline-block;border-radius:5px;">
-            Create  $MODAL_NAME_LOWER$
+            Create  $MODEL_NAME_LOWER$
         </a>
     </caption>
     <thead>
@@ -21,31 +21,38 @@ $YIELD_SECTION$
     </thead>
     <tbody>
     @if(count($$TABLE_NAME$) > 0)
-        @foreach($$TABLE_NAME$ as $$MODAL_NAME_LOWER$)
+        @foreach($$TABLE_NAME$ as $$MODEL_NAME_LOWER$)
             <tr style="background-color:white;">
                 $TABLEBODYTD$
                 <td>
-                    <a href="{{route('$TABLE_NAME$.show', $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" 
+                    <a href="{{route('$TABLE_NAME$.show', $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" 
                         style="text-decoration:none;background-color:#5bc0de;color:white;padding:5px 5px;text-align:center;display:inline-block;border-radius:5px;">
                         Show
                     </a>
-                    <a href="{{route('$TABLE_NAME$.edit', $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" 
+                    <a href="{{route('$TABLE_NAME$.edit', $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" 
                         style="text-decoration:none;background-color:#0275d8;color:white;padding:5px 5px;text-align:center;display:inline-block;border-radius:5px;">
                         Edit
                     </a>
-                    <form method="POST" action="{{ route('$TABLE_NAME$.destroy',  $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$) }}" style="display: inline-block;">
+                    <form method="POST" action="{{ route('$TABLE_NAME$.destroy',  $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$) }}" style="display: inline-block;">
                         @csrf
                         @method('DELETE')
                         <button type="submit" 
                             style="background-color:#d9534f;color:white;padding:5px 5px;text-align:center;display:inline-block;border: none;border-radius:5px;"
-                            onclick="return confirm('Are you sure you want to delete this $MODAL_NAME_LOWER$?')">
+                            onclick="return confirm('Are you sure you want to delete this $MODEL_NAME_LOWER$?')">
                             Delete
                         </button>
                     </form>
                 </td>
             </tr>
         @endforeach
+    @else
+        <tr  style="background-color:white;">
+            <td colspan="$TOTAL_TABLE_COLS$" >
+                {{ __('No $TABLE_NAME$ found') }}
+            </td>
+        </tr>
     @endif
     </tbody>
 </table>
+{{ $$TABLE_NAME$->links() }}
 $YIELD_SECTION_END$

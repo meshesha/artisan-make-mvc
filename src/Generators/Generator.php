@@ -11,6 +11,9 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
+use Illuminate\Support\Str;
+use Faker\Factory as Faker;
+
 class Generator
 {
     protected $config;
@@ -46,6 +49,7 @@ class Generator
             'section' => App::get('config')->get('ArtisanMakeMvc.section', "@section('content')"),
             'endsection' => App::get('config')->get('ArtisanMakeMvc.endsection', "@endsection"),
             'add_route' => App::get('config')->get('ArtisanMakeMvc.add_route', true),
+            'rows_per_page' => App::get('config')->get('ArtisanMakeMvc.rows_per_page', 10),
         ];
 
         $this->config = $config_arr;
@@ -62,11 +66,19 @@ class Generator
      * @param  string  $view_path
      * @param  array  $controller_param
      */
-    public function makeMvc(array $model_param, string $view_path, array $controller_param)
+    public function makeMvc(
+        array $model_param, 
+        string $view_path, 
+        array $controller_param, 
+        bool $is_test, 
+        bool $is_pest,
+        bool $is_factory)
     {
         $create_controller = false;
         $create_views = false;
         $add_rout = false;
+        $create_factory = false;
+        $create_test = false;
 
         $add_to_history = $this->add_to_history;
 
@@ -81,10 +93,24 @@ class Generator
         //add route
         if($this->config['add_route'] && $this->inc_route) {
             $add_rout = $this->addRoute($model_param, $controller_param);
-
         }
-        if($add_to_history && ($create_controller || $create_views || $add_rout)) {
-            $his_stt = $this->addToHis($model_param["model_name"], $create_controller, $create_views, $add_rout);
+
+        if($is_test){
+            // $this->cmd->error("add phpunit test");
+            $create_factory = $this->createFactory($model_param);
+            $create_test = $this->createTest($model_param);
+        }
+
+        if($is_pest) {
+            $this->cmd->error("add pest test");
+        }
+
+        if($is_factory && !$create_factory){
+            $create_factory = $this->createFactory($model_param);
+        }
+
+        if($add_to_history && ($create_controller || $create_views || $add_rout || $create_factory || $create_test)) {
+            $his_stt = $this->addToHis($model_param["model_name"], $create_controller, $create_views, $add_rout, $create_factory, $create_test);
         }
 
     }
@@ -248,16 +274,76 @@ class Generator
 
     }
 
+    private function createFactory($model)
+    {
+        $modelName = $model["model_name"];
+        $factory_path = "database/factories/{$modelName}Factory.php";
+
+        $factory_stub_file = $this->getFactoryStubPath();
+ 
+        $stub_variables = $this->getStubVariables("factory", $model, "", "");
+
+
+        return $this->createDestFileFromStubFile($factory_stub_file, $stub_variables, $factory_path);
+
+    }
+
+    /**
+     * Return the stub file path
+     * @return string
+     *
+     */
+    private function getFactoryStubPath()
+    {
+        return   __DIR__ .'/stubs/factory/factory.stub';
+    }
+
+
+    private function createTest($model)
+    {
+        $modelName = $model["model_name"];
+        $test_path = "tests/Feature/{$modelName}Test.php";
+
+        $test_stub_file = $this->getTestStubPath();
+ 
+        $stub_variables = $this->getStubVariables("test", $model, "", "");
+
+
+        return $this->createDestFileFromStubFile($test_stub_file, $stub_variables, $test_path);
+
+    }
+
+    /**
+     * Return the stub file path
+     * @return string
+     *
+     */
+    private function getTestStubPath()
+    {
+        return   __DIR__ .'/stubs/test/test.stub';
+    }
+
+    /**
+     * Return the stub file path
+     * @return string
+     *
+     */
+    // private function getPestStubPath()
+    // {
+    //     return   __DIR__ .'/stubs/test/pest.stub';
+    // }
+
     private function getStubVariables($type, $model, $view_path, $controller)
     {
-
+        $paginate = ($this->config["template"] == "default")?"simplePaginate":"paginate";
+        $paginate_per_page = $this->config["rows_per_page"];
         $model_path = $model["model_path"];
         $primary_key = $model["primary_key"];
         $table_name = $model["db_table_name"];
         $model_name = $model["model_name"];
 
-        $ctrl_name = $controller["name"];
-        $ctrl_path = $controller["path"];
+        $ctrl_name = $controller["name"]??"";
+        $ctrl_path = $controller["path"]??"";
 
         $extends = $this->config["extends"];
         $section = $this->config["section"];
@@ -273,13 +359,15 @@ class Generator
                 $request_to_var = $this->getStoreUpdatePlaceHolder("r_to_v", $model["columns"], $model_name_lower, $primary_key, true);
                 $var_to_model = $this->getStoreUpdatePlaceHolder("v_to_m", $model["columns"], $model_name_lower, $primary_key, false);
                 return  [
-                    'USE_MODAL'         => 'use ' .$model_path,
+                    'USE_MODEL'         => 'use ' .$model_path,
                     'CONTROLLER_NAME'   => $ctrl_name,
-                    'MODAL_NAME'        => $model_name,
-                    'MODAL_NAME_LOWER'  => $model_name_lower,
+                    'MODEL_NAME'        => $model_name,
+                    'MODEL_NAME_LOWER'  => $model_name_lower,
                     'TABLE_NAME'        => $table_name,
                     'REQUEST_INPUT_TO_VAR' => $request_to_var,
                     'VARTOMODEL'        => $var_to_model,
+                    'PAGINATE'          => $paginate,
+                    'PAGINATE_PER_PAGE'    => $paginate_per_page
                 ];
                 break;
             case "index":
@@ -291,10 +379,11 @@ class Generator
                     "YIELD_SECTION"     => $section,
                     "HEAD_TITLE"        => $tbl_name_to_title,
                     "TABLE_NAME"        => $table_name,
-                    "MODAL_NAME_LOWER"  => $model_name_lower,
+                    "MODEL_NAME_LOWER"  => $model_name_lower,
                     "TABLETH"           => $tbl_th,
                     "TABLEBODYTD"       => $tbl_td,
                     "PRIMARY_KEY_NAME"  => $primary_key,
+                    "TOTAL_TABLE_COLS"  => (count($model["columns"]) + 1),
                     "YIELD_SECTION_END" => $section_end,
                 ];
                 break;
@@ -306,7 +395,7 @@ class Generator
                     "HEAD_TITLE"        => $tbl_name_to_title,
                     "TABLE_NAME"        => $table_name,
                     "SHOW_CONTENT"      => $show_content,
-                    "MODAL_NAME_LOWER"  => $model_name_lower,
+                    "MODEL_NAME_LOWER"  => $model_name_lower,
                     "PRIMARY_KEY_NAME"  => $primary_key,
                     "YIELD_SECTION_END" => $section_end,
 
@@ -331,9 +420,30 @@ class Generator
                     "HEAD_TITLE"        => $tbl_name_to_title,
                     "TABLE_NAME"        => $table_name,
                     "UPDATE_CONTENT"    => $cu_content,
-                    "MODAL_NAME_LOWER"  => $model_name_lower,
+                    "MODEL_NAME_LOWER"  => $model_name_lower,
                     "PRIMARY_KEY_NAME"  => $primary_key,
                     "YIELD_SECTION_END" => $section_end,
+                ];
+                break;
+            case "factory":
+                $factory_content = $this->getFactroyContent($model);
+                return [
+                    "MODEL_NAME"    => $model_name,
+                    "FACTORYDATA"     => $factory_content,
+                ];
+                break;
+            case "test":
+                $modal_create = $this->getTestModelContent($model);
+                $model_col_without_primary = array_values(array_filter($model["columns"], function ($col) use ($primary_key){
+                                                return $col != $primary_key;
+                                            }));
+                return [
+                    "USE_MODEL"         => 'use ' . $model_path,
+                    "MODEL_NAME"        => $model_name,
+                    "TABLE_NAME"        => $table_name,
+                    "MODEL_NAME_LOWER"  => $model_name_lower,
+                    "MODEL_CREATE"      => $modal_create ,
+                    "MODEL_COL_NAME"    => $model_col_without_primary[0],
                 ];
                 break;
         }
@@ -587,7 +697,6 @@ class Generator
 
         return $str;
     }
-
     /**
      * Add route to routes/web.php
      */
@@ -637,9 +746,165 @@ class Generator
 
     }
 
-    private function removeSpecialChar($str)
+
+
+    private function getFactroyContent($model)
     {
-        return preg_replace('/[^a-zA-Z0-9]/s', ' ', $str);
+        $cols = $model["columns"];
+        $primary_key = $model["primary_key"];
+        $columnInfo = (isset($model["columnInfo"])) ? $model["columnInfo"] : [];
+
+        if(empty($cols) || empty($columnInfo)) {
+            return '';
+        }
+
+        $str = "\n";
+
+
+        foreach($cols as $col) {
+           
+            if($col != $primary_key && $col != "created_at"  && $col != "updated_at" ) {
+                $col_low = $this->removeSpecialChar(strtolower($col), '');
+                $tabs_lvl1 = $this->generateTabs(3);
+                
+                // $str .= "$tabs_lvl1'$col' => '',\n";
+
+                $col_type = strtolower($columnInfo[$col]['type']);
+                $col_length = $columnInfo[$col]['length'];
+                $col_default = $columnInfo[$col]['default'];
+                $col_is_nullable = $columnInfo[$col]['nullable'];
+
+                // $str .= "$tabs_lvl1'$col' => 'type: $col_type,length:$col_length,default: $col_default,is_nullable: $col_is_nullable',\n";
+
+                
+                if($col_type == "varchar" || $col_type == "string") {
+                    $str_len = ((int)$col_length > 10)? 10:$col_length; 
+                    $str .= "$tabs_lvl1'$col' => Str::random($str_len),\n";
+                }else if($col_type == "text") {
+                    $txt_len = ((int)$col_length > 100)? 100:$col_length; 
+                     $str .= "$tabs_lvl1'$col' => \$this->faker->text($txt_len),\n";
+                }else if($col_type == "timestamp") {
+                    $str .= "$tabs_lvl1'$col' => now(),\n";
+                }else if($col_type == "date") {
+                    $str .= "$tabs_lvl1'$col' => date(\"Y-m-d\"),\n";
+                } elseif($col_type == "datetime") {
+                    $str .= "$tabs_lvl1'$col' => date(\"Y-m-d H:i:s\"),\n";
+                }else if(
+                    $col_type == "tinyint" ||
+                    $col_type == "boolean" ||
+                    $col_type == "smallint" ||
+                    $col_type == "int" || 
+                    $col_type == "integer" || 
+                    $col_type == "mediumint" || 
+                    $col_type == "bigint" || 
+                    $col_type == "decimal" || 
+                    $col_type == "double" || 
+                    $col_type == "float" ) {
+                    if((int)$col_length > 0){
+                        $str .= "$tabs_lvl1'$col' => \$this->faker->randomNumber($col_length, false),\n";
+                    }else{
+                        $str .= "$tabs_lvl1'$col' => 0,\n";
+                    }
+                }
+                else {
+                    // if($col_default == "" && $col_is_nullable == "no"){
+                         $str .= "$tabs_lvl1'$col' => '',\n";
+                    // }
+
+                }
+                // $tabs_lvl1 = $this->generateTabs(3);?
+
+            }
+        }
+
+        return $str;
+    }
+
+
+
+    private function getTestModelContent($model)
+    {
+        $cols = $model["columns"];
+        $primary_key = $model["primary_key"];
+        $columnInfo = (isset($model["columnInfo"])) ? $model["columnInfo"] : [];
+
+        if(empty($cols) || empty($columnInfo)) {
+            return '';
+        }
+
+        $faker = Faker::create();
+        $str = "\n";
+        foreach($cols as $col) {
+           
+            if($col != $primary_key && $col != "created_at"  && $col != "updated_at" ) {
+                $col_low = $this->removeSpecialChar(strtolower($col), '');
+                $tabs_lvl1 = $this->generateTabs(3);
+                
+                // $str .= "$tabs_lvl1'$col' => '',\n";
+
+                $col_type = strtolower($columnInfo[$col]['type']);
+                $col_length = $columnInfo[$col]['length'];
+                $col_default = $columnInfo[$col]['default'];
+                $col_is_nullable = $columnInfo[$col]['nullable'];
+
+                // $str .= "$tabs_lvl1'$col' => 'type: $col_type,length:$col_length,default: $col_default,is_nullable: $col_is_nullable',\n";
+
+                
+                if($col_type == "varchar" || $col_type == "string") {
+                    $str_len = ((int)$col_length > 10)? 10:$col_length; 
+                    $str .= "$tabs_lvl1'$col' => '" . Str::random($str_len). "',\n";
+                }else if($col_type == "text") {
+                    $txt_len = ((int)$col_length > 100)? 100:$col_length; 
+                     $str .= "$tabs_lvl1'$col' => '". $faker->text($txt_len). "',\n";
+                }else if($col_type == "timestamp") {
+                    $str .= "$tabs_lvl1'$col' => " . now() . ",\n";
+                }else if($col_type == "date") {
+                    $str .= "$tabs_lvl1'$col' => '" . date("Y-m-d") . "',\n";
+                } elseif($col_type == "datetime") {
+                    $str .= "$tabs_lvl1'$col' => '" . date("Y-m-d H:i:s") .  "',\n";
+                }else if(
+                    $col_type == "tinyint" ||
+                    $col_type == "boolean" ||
+                    $col_type == "smallint" ||
+                    $col_type == "int" || 
+                    $col_type == "integer" || 
+                    $col_type == "mediumint" || 
+                    $col_type == "bigint" || 
+                    $col_type == "decimal" || 
+                    $col_type == "double" || 
+                    $col_type == "float" ) {
+                    if((int)$col_length > 0){
+                        $str .= "$tabs_lvl1'$col' => " . $faker->randomNumber($col_length, false) . ",\n";
+                    }else{
+                        $str .= "$tabs_lvl1'$col' => 0,\n";
+                    }
+                }
+                else {
+                    //enum - TODO
+                    // if($col_default == "" && $col_is_nullable == "no"){
+                         $str .= "$tabs_lvl1'$col' => '',\n";
+                    // }
+
+                }
+                // $tabs_lvl1 = $this->generateTabs(3);?
+
+            }
+        }
+
+        return $str;
+    }
+
+
+
+
+
+
+
+
+    private function removeSpecialChar($str, $replace_with = ' ')
+    {
+
+        return preg_replace('/[^a-zA-Z0-9]/s',$replace_with, $str);
     }
 
 
@@ -658,7 +923,7 @@ class Generator
     /**
      * Add to his file
      */
-    private function addToHis($model_name, $create_controller, $create_views, $route)
+    private function addToHis($model_name, $create_controller, $create_views, $route, $factory, $test)
     {
         //get history file path
         $his_path = $this->getHisFile();
@@ -681,6 +946,12 @@ class Generator
         }
         if($route !== false) {
             $obj->route = $route;
+        }
+        if($factory !== false) {
+            $obj->factory = $factory;
+        }
+        if($test !== false) {
+            $obj->test = $test;
         }
 
         $his_json[] = $obj;

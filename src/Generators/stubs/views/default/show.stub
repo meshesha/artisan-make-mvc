@@ -7,7 +7,7 @@ $YIELD_SECTION$
         style="text-decoration:none;background-color:#5bc0de;color:white;padding:5px 5px;text-align:center;display:inline-block;border-radius:5px;">
         Go Back
     </a>
-    <a href="{{route('$TABLE_NAME$.edit', $$MODAL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}"
+    <a href="{{route('$TABLE_NAME$.edit', $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}"
         style="text-decoration:none;background-color:#0275d8;color:white;padding:5px 5px;text-align:center;display:inline-block;border-radius:5px;">
         Edit
     </a>
