@@ -69,6 +69,40 @@ trait FilesAssert
 
     
 
+    public static function isfactoryExists($name)
+    {
+        self::assertFileExists(base_path('database/factories/'.$name));
+    }
+
+    public static function isFactoryNotExists($name)
+    {
+        self::assertFileDoesNotExist(base_path('database/factories/'.$name));
+    }
+
+    public static function isTestExists($name)
+    {
+        self::assertFileExists(base_path('tests/Feature/'.$name));
+    }
+
+    public static function isTestNotExists($name)
+    {
+        self::assertFileDoesNotExist(base_path('tests/Feature/'.$name));
+    }
+
+
+    public static function isPestTestExists($name)
+    {
+        self::assertFileExists(base_path('tests/Feature/'.$name));
+    }
+
+    public static function isPestTestNotExists($name)
+    {
+        self::assertFileDoesNotExist(base_path('tests/Feature/'.$name));
+    }
+
+
+
+
     public static function getHisFileContent()
     {
         

@@ -36,6 +36,9 @@ model :  the existing model name (required) (e.g. 'Post')
 --inccontroller | -C : Whether to include\create controller (optional) (default value : true)
 --incroute      | -R : Whether or not to add a route to the routers file (optional) (default value : true)
 
+--factory            : Add factory file (ModelNameFactory.php)  in "database/Factories" directory.
+--test               : Add test file (ModelNameTest.php) in "tests/Feature" directory and factory file  in "database/Factories" directory (because it is required for testing).
+
 ```
 
 ### Config file (config\ArtisanMakeMvc.php)
@@ -80,12 +83,20 @@ Route::resource('posts', 'PostController');
 
 
 ### undo
-
+### undo last action
 ```bash
 
 php artisan mvc:undo
 
 ```
+### more options:
+
+ ```
+ -L | --list    : shows history list
+ -S | --select  : select from list for 'undo' action.
+
+ ```
+
 
 Will delete all recently created files
 
