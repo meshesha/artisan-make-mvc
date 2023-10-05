@@ -1,0 +1,7 @@
+<phpunit>
+    <testsuites>
+        <testsuite name="ArtisanMakeMvc">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
