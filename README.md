@@ -24,6 +24,25 @@ php artisan vendor:publish --provider="Meshesha\ArtisanMakeMvc\ArtisanMakeMvcSer
 ```
 
 ## Usage
+- This package depends on an existing model.
+So it is required to create a model: 
+
+```bash
+php artisan make:model Post -m
+```
+- complete the required column names in the migration file,
+and migrate to the database.
+
+- Inside the model file you must add $fillable
+
+```php
+protected $fillable = [
+'title',
+'body',
+];
+```
+
+
 
 ### Command options
 
