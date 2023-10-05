@@ -6,8 +6,8 @@ $YIELD_SECTION$
         <h1 class="card-header d-flex justify-content-between align-items-center">
             $HEAD_TITLE$
             <div>
-                <a href="{{ url()->previous() }}" class="btn btn-info">Go Back</a>
                 <a href="{{route('$TABLE_NAME$.create')}}"  class="btn btn-primary">Create $MODEL_NAME_LOWER$</a>
+                <a href="{{ url()->previous() }}" class="btn btn-info">Go Back</a>
             </div>
         </h1>
         <div class="card-body">
@@ -31,7 +31,7 @@ $YIELD_SECTION$
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
-                                            class="btn btn-danger btn-sm"
+                                            class="btn btn-outline-danger btn-sm"
                                             onclick="return confirm('Are you sure you want to delete this $MODEL_NAME_LOWER$?')">
                                             Delete
                                         </button>

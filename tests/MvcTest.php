@@ -282,7 +282,7 @@ class MvcTest extends MvcTestCase
 
     }
 
-    public function test_end_delete_test_table()
+    public function test_end_and_delete_test_table()
     {
         //delete test table
         Schema::dropIfExists('test_posts');

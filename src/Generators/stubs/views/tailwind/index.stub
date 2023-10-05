@@ -1,0 +1,64 @@
+$EXTEND_LAYOUTS$
+
+$YIELD_SECTION$
+<div class="bg-gray-300 w-full h-full flex flex-col items-center p-4">
+    <div class="bg-gray-700 text-white max-w-5xl w-full flex flex-col rounded-xl shadow-lg p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="text-md font-bold">$HEAD_TITLE$</div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ route('$TABLE_NAME$.create') }}"
+                    class="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Create $MODEL_NAME_LOWER$</a>
+                <a href="{{ url()->previous() }}"
+                    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">Go Back</a>
+            </div>
+        </div>
+        <div class="mt-4 text-gray-500 font-bold text-sm">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr class="table-primary">
+                        $TABLETH$
+                        <th scope="col" class="px-6 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if(count($$TABLE_NAME$) > 0)
+                    @foreach($$TABLE_NAME$ as $$MODEL_NAME_LOWER$)
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                            $TABLEBODYTD$
+                            <td class="px-6 py-4 text-right">
+                                <div class="inline-flex rounded-md shadow-sm">
+                                    <a href="{{route('$TABLE_NAME$.show', $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" 
+                                        class="text-white bg-cyan-500 hover:bg-cyan-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Show</a>
+                                    <a href="{{route('$TABLE_NAME$.edit', $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" 
+                                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Edit</a>
+                                    <form method="POST" action="{{ route('$TABLE_NAME$.destroy',  $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                            class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900""
+                                            onclick="return confirm('Are you sure you want to delete this $MODEL_NAME_LOWER$?')">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="$TOTAL_TABLE_COLS$" >
+                            {{ __('No $TABLE_NAME$ found') }}
+                        </td>
+                    </tr>
+                @endif
+                </tbody>
+            </table>
+            <div class="mt-2 bg-gray-300 p-2 rounded-md">
+                {{ $$TABLE_NAME$->links() }}
+            </div>
+        </div>
+    </div>
+</div>
+$YIELD_SECTION_END$

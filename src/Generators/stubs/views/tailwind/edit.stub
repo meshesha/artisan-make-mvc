@@ -1,0 +1,26 @@
+$EXTEND_LAYOUTS$
+
+$YIELD_SECTION$
+<div class="bg-gray-300 w-full h-full flex flex-col items-center p-4">
+    <div class="bg-gray-700 text-white max-w-5xl w-full flex flex-col rounded-xl shadow-lg p-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="text-md font-bold">$HEAD_TITLE$</div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{{ route('$TABLE_NAME$.index') }}" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"> Go Back</a>
+			</div>
+		</div>
+        <div class="mt-4 text-gray-500 font-bold text-sm">
+            <form action="{{route('$TABLE_NAME$.update',  $$MODEL_NAME_LOWER$->$PRIMARY_KEY_NAME$)}}" method="POST">
+                @csrf
+                $UPDATE_CONTENT$
+                @method('PUT')
+                <div class="text-center">
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+$YIELD_SECTION_END$

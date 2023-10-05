@@ -3,6 +3,7 @@
 Laravel package that adds artisan command to create view, controller and route using existing Model. One command line and you can already see results.
 
 ## Requirements
+
 - laravel >= 5.6
 
 ## Installation
@@ -14,6 +15,7 @@ Via [composer](http://getcomposer.org):
 ```bash
 composer require meshesha/artisan-make-mvc
 ```
+
 ### Publish config file
 
 ```bash
@@ -45,7 +47,7 @@ model :  the existing model name (required) (e.g. 'Post')
 
 ```php
 return [
-    "template" => "default", //templates: default, bootstrap4
+    "template" => "default", //templates: default (Vanilla CSS), bootstrap, tailwind
     "extends" => "", //e.g: @extends('layouts.app')
     "section" => "", //e.g: @section('content')
     "endsection" => "", //e.g: @endsection
@@ -61,19 +63,23 @@ php artisan make:mvc Post
 
 # 'Post' - model name
 ```
+
 This command will create:
+
 - [PostController.php](https://github.com/meshesha/artisan-make-mvc/wiki/PostController)
-- [views/posts/create.blade.php](https://github.com/meshesha/artisan-make-mvc/wiki/create.blade.php(default-tmpl))
-- [views/posts/edit.blade.php](https://github.com/meshesha/artisan-make-mvc/wiki/edit.blade.php(default))
-- [views/posts/index.blade.php](https://github.com/meshesha/artisan-make-mvc/wiki/index.blade.php(default))
-- [views/posts/show.blade.php](https://github.com/meshesha/artisan-make-mvc/wiki/show.blade.php(default))
+- [views/posts/create.blade.php](<https://github.com/meshesha/artisan-make-mvc/wiki/create.blade.php(default-tmpl)>)
+- [views/posts/edit.blade.php](<https://github.com/meshesha/artisan-make-mvc/wiki/edit.blade.php(default)>)
+- [views/posts/index.blade.php](<https://github.com/meshesha/artisan-make-mvc/wiki/index.blade.php(default)>)
+- [views/posts/show.blade.php](<https://github.com/meshesha/artisan-make-mvc/wiki/show.blade.php(default)>)
 
 And add to routes/web.php:
 For laravel version >= 8.0.0
+
 ```php
 // posts:
 Route::resource('posts', App\Http\Controllers\PostController::class);
 ```
+
 For laravel version < 8.0.0
 
 ```php
@@ -81,32 +87,27 @@ For laravel version < 8.0.0
 Route::resource('posts', 'PostController');
 ```
 
-
 ### undo
-### undo last action
+
+#### undo last action
+
 ```bash
 
 php artisan mvc:undo
 
 ```
-### more options:
 
- ```
- -L | --list    : shows history list
- -S | --select  : select from list for 'undo' action.
+Will delete all recently created files.
 
- ```
+#### more options:
 
+```
+-L | --list    : shows history list
+-S | --select  : select from list for 'undo' action.
 
-Will delete all recently created files
-
-
-
+```
 
 ## License
 
 MIT License (MIT). Please see the
 [license file](LICENSE.md) for more information.
-
-
-
