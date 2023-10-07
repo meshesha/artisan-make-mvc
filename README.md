@@ -1,10 +1,11 @@
 # Aartisan make Mvc
 
-Laravel package that adds artisan command to create view, controller and route using existing Model. One command line and you can already see results.
+Laravel package that adds artisan command to create CRUD files and actions which includes: views (index,create,show,edit) , controller , add a route , factory and test . It depends on the existing model.
+And all this in a single command line.
 
 ## Requirements
 
-- laravel >= 5.6
+- laravel >= 7
 
 ## Installation
 
