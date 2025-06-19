@@ -383,7 +383,7 @@ class Generator
                     "SHOW_CONTENT"      => $show_content,
                     "MODEL_NAME_LOWER"  => $model_name_lower,
                     "YIELD_SECTION_END" => $section_end,
-
+                    "PRIMARY_KEY_NAME"  => $primary_key,
                 ];
                 break;
             case "create":
